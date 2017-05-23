@@ -60,8 +60,11 @@ position=[];
 spike_rate=[];
 n_bin=1;
 n_bypass=0;
+
+%%-- The while loop needs to be used, since we will skip points where speed is too low
 while size(position_proba,3)<nb_bins
 
+	%%-- Gives infos from time to time
 	if mod(n_bin,floor(nb_bins/10))==0
 		disp(['Decoding time bin number ',num2str(n_bin),' over ',num2str(nb_bins),' to decode (',num2str(size(position_proba,3)*100/nb_bins),' % achieved, ',num2str(n_bypass),' bypassed).']);
 	end
@@ -72,7 +75,7 @@ while size(position_proba,3)<nb_bins
 	positionY=[];
 	Mouse_Speed=[];
 	n_spike=0;
-	for polytrode = [1 2 3 4 5 6 7 8 9 10 11 12 13 14]
+	for polytrode = 1:n_polytrode
 		n_events_learning=ENCODED_DATA(polytrode).n_events_learning;
 		learning_time=ENCODED_DATA(polytrode).learning_time;
 
@@ -83,6 +86,7 @@ while size(position_proba,3)<nb_bins
 			fprintf(logID,'%d spikes for electrode %d.\n',size(bin_events,2),polytrode);
 			n_spike=[n_spike;size(bin_events,2)];
 
+			%%-- We extract ground truth about position and speed of the mouse
 			time=learning_time+(n_bin-0.5)*time_bin;
 			[idx idx]=min(abs(Pos(:,1)-time));
 			positionX=[positionX Pos(idx,2)];
@@ -94,7 +98,7 @@ while size(position_proba,3)<nb_bins
 			current_event_likelihood=event_likelihood(DATA(polytrode).events(1:end-2,bin_events), time_bin, ENCODED_DATA(polytrode).Rate_Function, ENCODED_DATA(polytrode).Marginal_Rate_Function, ENCODED_DATA(polytrode).twofirstbins);
 			position_estimates=position_density_proba(current_event_likelihood, prior_estimate);
 
-			
+			%%-- All_estimations contains 14 maps of probability, containing the result from each tetrodes (except empty ones)
 			All_estimations=cat(3,All_estimations,position_estimates);
 			clearvars position_estimates
 		else
@@ -105,6 +109,7 @@ while size(position_proba,3)<nb_bins
 	Mouse_Speed=mean(Mouse_Speed);
 	positionX=mean(positionX);
 	positionY=mean(positionY);
+	%%-- Converting position to grid-like coordinates
 	positionX=floor((positionX-ENCODED_DATA(14).twofirstbins(end-1,1))/(ENCODED_DATA(14).twofirstbins(end-1,2)-ENCODED_DATA(14).twofirstbins(end-1,1)))+1;
 	positionY=floor((positionY-ENCODED_DATA(14).twofirstbins(end,1))/(ENCODED_DATA(14).twofirstbins(end,2)-ENCODED_DATA(14).twofirstbins(end,1)))+1;
 	fprintf(logID,'Position read by camera, in grid coordinates : %d %d\n',positionX,positionY);
@@ -114,16 +119,17 @@ while size(position_proba,3)<nb_bins
 		continue
 	end
 	
-	position_estimates=ones(size(All_estimations,1),size(All_estimations,2));
 
+	
+	%-- position_estimates contains the result for this bin
+	position_estimates=ones(size(All_estimations,1),size(All_estimations,2));
 	for polytrode=1:size(All_estimations,3)
 		position_estimates(:,:)=position_estimates(:,:).*All_estimations(:,:,polytrode);
 	end
 
 	position_estimates(:,:)=normalise_deg1(position_estimates(:,:));
 
-	Mouse_Speed
-	pause
+
 	if Mouse_Speed>9
 		position=[position [positionX;positionY]];
 		position_proba=cat(3,position_proba,position_estimates);
