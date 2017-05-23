@@ -55,6 +55,7 @@ for polytrode=1:n_polytrode
 
 	if n_events~=0
 		n_events_learning=1;
+		%%-- Determines the number of events to learn from.
 		while DATA(polytrode).spikes(n_events_learning)<learning_time
 			if n_events_learning==n_events
 				break
