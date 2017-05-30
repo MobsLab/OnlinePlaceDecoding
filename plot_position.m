@@ -1,7 +1,7 @@
 try isstr(position_proba);
 catch
 	try
-		decoding_results=importdata('decoding_results_50ms.mat');
+		decoding_results=importdata('decoding_results_100ms.mat');
 		position_proba=decoding_results.position_proba;
 		position=decoding_results.position;
 		spike_rate=decoding_results.spike_rate;
@@ -117,7 +117,7 @@ end
 % 	plot(arena1x,arena1y,'-g');
 % 	plot(position(2,n),position(1,n),'o','Color','r','markerfacecolor','r');hold off;
 % 	colormap(parula);
-% 	pause(0.1);
+% 	pause(0.03);
 % 	if mod(n,floor(size(position,2)/100))==0
 % 		disp(['Reading results of decoding, ', num2str(100*n/size(position,2)), '% achieved']);
 % 	end
@@ -240,24 +240,27 @@ savefig([FileName,'error_deviation_image.fig']);
 disp('to find the nth point on the map : plot(position(2,n),position(1,n),''go'')');
 
 
-% f1=figure('Name','X&Y_w50ms','NumberTitle','off');clf;
-% sb(1)=subplot(2,1,1);
-% handle=fill([X,fliplr(X)],[guess_of_X-ecartT_x fliplr(guess_of_X+ecartT_x)],[176/255 224/255 230/255]);hold on;
-% set(handle,'edgecolor','none');
-% plot(guess_of_X,'Color',[70/255 130/255 180/255]);hold on;
-% plot(position(1,:),'Color',[220/255 20/255 60/255]);
-% %plot(list10ms,result10msX,'.','Color',[47/255 79/255 79/255]);
-% plot(list50ms,result50msX,'o','Color','k','markerfacecolor','k')
-% legend('estimation of X up to one-sigma','estimation of X','measurement of X','10ms results w/escartT<6');
-% xlabel('time'); ylabel('position along X axis');
-% sb(2)=subplot(2,1,2);
-% handle=fill([X,fliplr(X)],[guess_of_Y-ecartT_y fliplr(guess_of_Y+ecartT_y)],[176/255 224/255 230/255]);hold on;
-% set(handle,'edgecolor','none');
-% plot(guess_of_Y,'Color',[70/255 130/255 180/255]);hold on;
-% plot(position(2,:),'Color',[220/255 20/255 60/255]);
-% plot(list50ms,result50msY,'o','Color','k','markerfacecolor','k');
-% legend('estimation of Y up to one-sigma','estimation of Y','measurement of Y','10ms results w/escartT<6');
-% xlabel('time'); ylabel('position along Y axis');
-% linkaxes(sb');
-% xlim([500*10/10 1000*10/10]);
-% savefig([FileName,'X&Y_w50ms.fig']);
+list50ms=intersect(find(ecartT_x<4),find(ecartT_y<5));
+result50msX=guess_of_X(list50ms);
+result50msY=guess_of_Y(list50ms);
+f1=figure('Name','X&Y_w50ms','NumberTitle','off');clf;
+sb(1)=subplot(2,1,1);
+handle=fill([X,fliplr(X)],[guess_of_X-ecartT_x fliplr(guess_of_X+ecartT_x)],[176/255 224/255 230/255]);hold on;
+set(handle,'edgecolor','none');
+plot(guess_of_X,'Color',[70/255 130/255 180/255]);hold on;
+plot(position(1,:),'Color',[220/255 20/255 60/255]);
+%plot(list10ms,result10msX,'.','Color',[47/255 79/255 79/255]);
+plot(list50ms,result50msX,'o','Color','k','markerfacecolor','k')
+legend('estimation of X up to one-sigma','estimation of X','measurement of X','10ms results w/escartT<6');
+xlabel('time'); ylabel('position along X axis');
+sb(2)=subplot(2,1,2);
+handle=fill([X,fliplr(X)],[guess_of_Y-ecartT_y fliplr(guess_of_Y+ecartT_y)],[176/255 224/255 230/255]);hold on;
+set(handle,'edgecolor','none');
+plot(guess_of_Y,'Color',[70/255 130/255 180/255]);hold on;
+plot(position(2,:),'Color',[220/255 20/255 60/255]);
+plot(list50ms,result50msY,'o','Color','k','markerfacecolor','k');
+legend('estimation of Y up to one-sigma','estimation of Y','measurement of Y','10ms results w/escartT<6');
+xlabel('time'); ylabel('position along Y axis');
+linkaxes(sb');
+xlim([500*10/10 1000*10/10]);
+savefig([FileName,'X&Y_w50ms.fig']);

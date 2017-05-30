@@ -110,8 +110,8 @@ while size(position_proba,3)<nb_bins
 	positionX=mean(positionX);
 	positionY=mean(positionY);
 	%%-- Converting position to grid-like coordinates
-	positionX=floor((positionX-ENCODED_DATA(14).twofirstbins(end-1,1))/(ENCODED_DATA(14).twofirstbins(end-1,2)-ENCODED_DATA(14).twofirstbins(end-1,1)))+1;
-	positionY=floor((positionY-ENCODED_DATA(14).twofirstbins(end,1))/(ENCODED_DATA(14).twofirstbins(end,2)-ENCODED_DATA(14).twofirstbins(end,1)))+1;
+	positionX=floor((positionX-ENCODED_DATA(1).twofirstbins(end-1,1))/(ENCODED_DATA(1).twofirstbins(end-1,2)-ENCODED_DATA(1).twofirstbins(end-1,1)))+1;
+	positionY=floor((positionY-ENCODED_DATA(1).twofirstbins(end,1))/(ENCODED_DATA(1).twofirstbins(end,2)-ENCODED_DATA(1).twofirstbins(end,1)))+1;
 	fprintf(logID,'Position read by camera, in grid coordinates : %d %d\n',positionX,positionY);
 
 	if isnan(positionX) || isnan(positionY)
@@ -130,7 +130,7 @@ while size(position_proba,3)<nb_bins
 	position_estimates(:,:)=normalise_deg1(position_estimates(:,:));
 
 
-	if Mouse_Speed>9
+	if Mouse_Speed>9 && positionX<=size(position_estimates,1) && positionY<=size(position_estimates,2)
 		position=[position [positionX;positionY]];
 		position_proba=cat(3,position_proba,position_estimates);
 		spike_rate=[spike_rate n_spike];

@@ -39,14 +39,14 @@ learning_time=max_time/2;
 
 
 %% Initialization of variables
-Ha=100;
+Ha=50;
 Hx=30;
-Bandwidths=[Ha Ha Ha Ha Hx Hx];
-Nbin_a=25;
-Nbin_x=30;
-N_bins=[Nbin_a Nbin_a Nbin_a Nbin_a Nbin_x Nbin_x];
+Bandwidths=[Ha Hx];
+Nbin_a=6;
+Nbin_x=20;
+N_bins=[Nbin_a Nbin_x];
 
-Encoded_data={};
+
 for polytrode=1:n_polytrode
 	disp(['Starting electrode ',num2str(polytrode),'.']);
 	n_events=size(DATA(polytrode).events,2);
@@ -63,7 +63,15 @@ for polytrode=1:n_polytrode
 			n_events_learning=n_events_learning+1;
 		end
 
+		%%-- Making useful variables for computing
 		T=DATA(polytrode).spikes(n_events_learning)/19531;
+		N_bins=[N_bins(1) N_bins(end)]; Bandwidths=[Bandwidths(1) Bandwidths(end)];
+		for adim=1:size(DATA(polytrode).events,1)-3
+			Bandwidths=[Bandwidths(1) Bandwidths];
+			N_bins=[N_bins(1) N_bins];
+		end
+		Bandwidths=[Bandwidths Bandwidths(end)];
+		N_bins=[N_bins N_bins(end)];
 
 		
 		clearvars Nbin_a Nbin_x Ha Hx posX posY channel data_id event led_id lfp_id place_id res_id spike spikes spk_id time_stamp
@@ -92,7 +100,7 @@ for polytrode=1:n_polytrode
 		
 
 	disp(['Electrode ',num2str(polytrode),' encoded.']);disp(sprintf('\n'));
-	clearvars -except Reading_result Encoded_data n_events DATA ENCODED_DATA n_events_learning learning_time nb_clusters N_bins Bandwidths
+	clearvars -except Reading_result n_events DATA ENCODED_DATA n_events_learning learning_time nb_clusters N_bins Bandwidths
 
 end
 

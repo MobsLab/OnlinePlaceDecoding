@@ -16,16 +16,27 @@ disp('Data Loaded.')
 
 %%%%%%%%%%%--- READ CLUSTERS INFO ---%%%%%%%%%%%
 cellnames=Waveforms.cellnames;
+n_tetrode=1;
+nb_clusters(1)=0;
+clusters{1}=[];
 for cluster=1:size(cellnames,2)
 	info = sscanf(cellnames{1,cluster},strcat('TT','%d','c','%d'));
-	nb_clusters(info(1))=info(2);
+	if info(1)==n_tetrode
+		nb_clusters(n_tetrode)=nb_clusters(n_tetrode)+1;
+		clusters{n_tetrode}=[clusters{n_tetrode} info(2)];
+	else
+		n_tetrode=info(1);
+		nb_clusters(n_tetrode)=1;
+		clusters{n_tetrode}=[];
+		clusters{n_tetrode}=[clusters{n_tetrode} info(2)];
+	end
 end
 
-for tetrode=1:size(nb_clusters,2)
-	clusters{tetrode}=(1:nb_clusters(tetrode));
-end
+% for tetrode=1:size(nb_clusters,2)
+% 	clusters{tetrode}=(1:max(clusters{tetrode}));
+% end
 
-clearvars cluster tetrode info
+clearvars cluster tetrode info n_tetrode
 
 
 
@@ -63,7 +74,7 @@ for tetrode=1:size(nb_clusters,2)
 	spike_pos=[];
 	buffer_pos=[];
 	unclassified_spikes=[];
-	clusters_cursors=ones(nb_clusters(tetrode),1);
+	clusters_cursors=ones(clusters{tetrode}(end),1);
 
 
 
@@ -75,7 +86,7 @@ for tetrode=1:size(nb_clusters,2)
 		if SpikeData.s(cursor,3)==0
 			%% This is cluster 0. This the trash. We don't use the trash.
 		else
-			features=Waveforms.W{1,sum(nb_clusters(1:tetrode-1))+SpikeData.s(cursor,3)}(clusters_cursors(SpikeData.s(cursor,3)),[1;2;3;4],15);
+			features=Waveforms.W{1,sum(nb_clusters(1:tetrode-1))+find(clusters{tetrode}==SpikeData.s(cursor,3))}(clusters_cursors(SpikeData.s(cursor,3)),(1:end)',15);
 			try
 				posX=Behavior.Pos(floor(SpikeData.s(cursor,1)/(Behavior.Pos(end,1)/size(Behavior.Pos,1))),2);
 				posY=Behavior.Pos(floor(SpikeData.s(cursor,1)/(Behavior.Pos(end,1)/size(Behavior.Pos,1))),3);
