@@ -1,7 +1,8 @@
 try isstr(position_proba);
 catch
 	try
-		decoding_results=importdata('decoding_results_100ms.mat');
+		file=dir('decoding*.mat');
+		decoding_results=importdata(file.name);
 		position_proba=decoding_results.position_proba;
 		position=decoding_results.position;
 		spike_rate=decoding_results.spike_rate;
