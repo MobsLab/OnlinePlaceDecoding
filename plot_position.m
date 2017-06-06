@@ -250,7 +250,25 @@ savefig([FileName,'error_deviation_image.fig']);
 disp('to find the nth point on the map : plot(position(2,n),position(1,n),''go'')');
 
 
-lowSigma_points=find(ecartT<7);
+% yyaxis right
+lowSigma_points=[];
+density=[0 0 0 0 0 0 0 0 0 0];
+for j=11:5000
+	S=0;
+	for k=0:9
+		S=S+ecartT(j-k)/(0.2*k+1);
+	end
+	density=[density S];
+end
+smoothed_density=smooth(density);
+% plot(smoothed_density);
+highdens=0;
+for j=1:5000
+	if smoothed_density(j)<max(smoothed_density)/3
+		lowSigma_points=[lowSigma_points j];
+	end
+end	
+% lowSigma_points=find(ecartT<7);
 lowSigma_X=guess_of_X(lowSigma_points);
 lowSigma_Y=guess_of_Y(lowSigma_points);
 f1=figure('Name','X&Y_with_Sigma<7','NumberTitle','off');clf;
