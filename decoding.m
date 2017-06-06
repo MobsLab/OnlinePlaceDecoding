@@ -1,4 +1,4 @@
-
+function decoding(Hx,Ha)
 %%%%%%%%%%%--- LOAD NEEDED RESOURCES ---%%%%%%%%%%%
 try isstr(DATA);
 catch 
@@ -30,7 +30,7 @@ catch
 	Speed=Speed.Speed;
 end
 
-clearvars -except DATA ENCODED_DATA nb_clusters Pos Speed
+clearvars -except DATA ENCODED_DATA nb_clusters Pos Speed Hx Ha
 
 
 
@@ -39,7 +39,7 @@ clearvars -except DATA ENCODED_DATA nb_clusters Pos Speed
 
 %%%%%%%%%%%--- META INFOS ---%%%%%%%%%%%
 c=clock;
-FileName=[date,'_','14_tetrodes_()_',num2str(c(4)),':',num2str(c(5))];
+FileName=[date,'_Ha=',num2str(Ha)];%num2str(c(4)),':',num2str(c(5))];
 mkdir(FileName);
 FileName=[FileName,'/'];
 logID = fopen([FileName,'decoding_log.txt'],'w');
@@ -146,6 +146,6 @@ disp(['Decoding finished ! We had ',num2str(size(position,2)),' readable bins.']
 cd(FileName);
 plot_position
 
-clearvars -except DATA ENCODED_DATA position_proba position nb_clusters R Pos FileName Speed n_bypass nb_bins spike_rate time_bin
+clearvars -except DATA ENCODED_DATA position_proba position nb_clusters R Pos FileName Speed n_bypass nb_bins spike_rate time_bin nb_lowSigma_points mean_pvalue mean_pvalue_lowSigma
 
-save([FileName,'decoding_results_',num2str(time_bin*1000),'ms.mat'],'position_proba','position','spike_rate','FileName','-v7.3');
+save([FileName,'decoding_results_',num2str(time_bin*1000),'ms.mat'],'position_proba','position','spike_rate','FileName','nb_lowSigma_points','mean_pvalue','mean_pvalue_lowSigma','-v7.3');

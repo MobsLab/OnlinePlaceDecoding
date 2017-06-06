@@ -1,4 +1,4 @@
-
+function encoding(Hx,Ha)
 %%%%%%%%%%%--- LOAD NEEDED RESOURCES ---%%%%%%%%%%%
 try isstr(DATA);
 catch 
@@ -39,11 +39,11 @@ learning_time=max_time/2;
 
 
 %% Initialization of variables
-Ha=50;
-Hx=30;
+% Ha=100;
+% Hx=30;
 Bandwidths=[Ha Hx];
-Nbin_a=6;
-Nbin_x=20;
+Nbin_a=25;
+Nbin_x=30;
 N_bins=[Nbin_a Nbin_x];
 
 

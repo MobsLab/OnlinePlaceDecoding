@@ -19,6 +19,7 @@ max_X=[];
 max_Y=[];
 ecartT_x=[];
 ecartT_y=[];
+p_value=[];
 correlations=[];
 generalized_error=[];
 specific_error=[];
@@ -37,6 +38,7 @@ fired_spikes=[];
 
 for n=1:size(position,2)	
 	a(:,:)=position_proba(:,:,n);
+	p_value=[p_value sum(a(a<a(position(1,n),position(2,n))))];
 
 	%%%--- Method using maximum of probability
 	[maxs,X]=max(position_proba(:,:,n));
@@ -188,19 +190,26 @@ title(['Comparison of error histogram | mean : ',num2str(mean(comparison_error))
 savefig([FileName,'errors.fig']);
 
 
+ecartT=sqrt(ecartT_x.^2+ecartT_y.^2);
 figure('Name','standard_deviation','NumberTitle','off');clf;
-subplot(2,2,1);
+subplot(2,3,1);
 plot(ecartT_x,generalized_error,'b.');
 xlabel('standard deviation of x');ylabel('generalized error');
-subplot(2,2,2);
+subplot(2,3,2);
 plot(ecartT_y,generalized_error,'b.');
 xlabel('standard deviation of y');ylabel('generalized error');
-subplot(2,2,3);
+subplot(2,3,4);
 histogram(ecartT_x,50);
 xlabel('standard deviation of x');
-subplot(2,2,4);
+subplot(2,3,5);
 histogram(ecartT_y,50);
 xlabel('standard deviation of y');
+subplot(2,3,3);
+plot(ecartT,generalized_error,'b.');
+xlabel('absolute standard deviation');ylabel('generalized error');
+subplot(2,3,6);
+histogram(ecartT,50);
+xlabel('absolute standard deviation');
 savefig([FileName,'standard_deviation']);
 
 
@@ -240,27 +249,40 @@ savefig([FileName,'error_deviation_image.fig']);
 disp('to find the nth point on the map : plot(position(2,n),position(1,n),''go'')');
 
 
-list50ms=intersect(find(ecartT_x<4),find(ecartT_y<5));
-result50msX=guess_of_X(list50ms);
-result50msY=guess_of_Y(list50ms);
-f1=figure('Name','X&Y_w50ms','NumberTitle','off');clf;
+lowSigma_points=find(ecartT<7);
+lowSigma_X=guess_of_X(lowSigma_points);
+lowSigma_Y=guess_of_Y(lowSigma_points);
+f1=figure('Name','X&Y_with_Sigma<7','NumberTitle','off');clf;
 sb(1)=subplot(2,1,1);
 handle=fill([X,fliplr(X)],[guess_of_X-ecartT_x fliplr(guess_of_X+ecartT_x)],[176/255 224/255 230/255]);hold on;
 set(handle,'edgecolor','none');
 plot(guess_of_X,'Color',[70/255 130/255 180/255]);hold on;
 plot(position(1,:),'Color',[220/255 20/255 60/255]);
 %plot(list10ms,result10msX,'.','Color',[47/255 79/255 79/255]);
-plot(list50ms,result50msX,'o','Color','k','markerfacecolor','k')
-legend('estimation of X up to one-sigma','estimation of X','measurement of X','10ms results w/escartT<6');
+plot(lowSigma_points,lowSigma_X,'o','Color','k','markerfacecolor','k')
+legend('estimation of X up to one-sigma','estimation of X','measurement of X','10ms results w/ecartT<7');
 xlabel('time'); ylabel('position along X axis');
 sb(2)=subplot(2,1,2);
 handle=fill([X,fliplr(X)],[guess_of_Y-ecartT_y fliplr(guess_of_Y+ecartT_y)],[176/255 224/255 230/255]);hold on;
 set(handle,'edgecolor','none');
 plot(guess_of_Y,'Color',[70/255 130/255 180/255]);hold on;
 plot(position(2,:),'Color',[220/255 20/255 60/255]);
-plot(list50ms,result50msY,'o','Color','k','markerfacecolor','k');
-legend('estimation of Y up to one-sigma','estimation of Y','measurement of Y','10ms results w/escartT<6');
+plot(lowSigma_points,lowSigma_Y,'o','Color','k','markerfacecolor','k');
+legend('estimation of Y up to one-sigma','estimation of Y','measurement of Y','10ms results w/ecartT<7');
 xlabel('time'); ylabel('position along Y axis');
 linkaxes(sb');
 xlim([500*10/10 1000*10/10]);
-savefig([FileName,'X&Y_w50ms.fig']);
+savefig([FileName,'X&Y_with_Sigma<7.fig']);
+
+mean_pvalue=mean(p_value);
+mean_pvalue_lowSigma=[];
+nb_lowSigma_points=[];
+for i=1:20
+	lowSigma_points=find(ecartT<i);
+	mean_pvalue_lowSigma=[mean_pvalue_lowSigma mean(p_value(lowSigma_points))];
+	nb_lowSigma_points=[nb_lowSigma_points size(lowSigma_points,2)];
+end
+
+try
+	save('decoding_results_100ms.mat','mean_pvalue','mean_pvalue_lowSigma','nb_lowSigma_points','-append');
+end

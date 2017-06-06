@@ -74,8 +74,9 @@ for tetrode=1:size(nb_clusters,2)
 	spike_pos=[];
 	buffer_pos=[];
 	unclassified_spikes=[];
-	clusters_cursors=ones(clusters{tetrode}(end),1);
-
+	if size(clusters{tetrode})
+		clusters_cursors=ones(clusters{tetrode}(end),1);
+	end
 
 
 	%% Reading data of a given tetrode
