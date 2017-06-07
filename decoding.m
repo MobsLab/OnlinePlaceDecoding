@@ -1,4 +1,4 @@
-function decoding(Hx,Ha)
+function decoding(varargin)
 %%%%%%%%%%%--- LOAD NEEDED RESOURCES ---%%%%%%%%%%%
 try isstr(DATA);
 catch 
@@ -33,13 +33,16 @@ end
 clearvars -except DATA ENCODED_DATA nb_clusters Pos Speed Hx Ha
 
 
-
+if nargin==0
+	Ha=100;
+	Hx=30;
+end
 
 
 
 %%%%%%%%%%%--- META INFOS ---%%%%%%%%%%%
 c=clock;
-FileName=[date,'_Ha=',num2str(Ha)];%num2str(c(4)),':',num2str(c(5))];
+FileName=[date,'_',num2str(c(4)),':',num2str(c(5))];
 mkdir(FileName);
 FileName=[FileName,'/'];
 logID = fopen([FileName,'decoding_log.txt'],'w');

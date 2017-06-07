@@ -1,4 +1,4 @@
-function encoding(Hx,Ha)
+function encoding(varargin)
 %%%%%%%%%%%--- LOAD NEEDED RESOURCES ---%%%%%%%%%%%
 try isstr(DATA);
 catch 
@@ -39,8 +39,10 @@ learning_time=max_time/2;
 
 
 %% Initialization of variables
-% Ha=100;
-% Hx=30;
+if nargin==0
+	Ha=100;
+	Hx=30;
+end
 Bandwidths=[Ha Hx];
 Nbin_a=25;
 Nbin_x=30;
