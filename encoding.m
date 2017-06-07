@@ -42,6 +42,12 @@ learning_time=max_time/2;
 if nargin==0
 	Ha=100;
 	Hx=30;
+elseif nargin==2
+	Hx=varargin{1};
+	Ha=varargin{2};
+else
+	Ha=100; Hx=30;
+	warning('Didn''t understand the number of arguments (neither 2 nor 0), bandwidths set to default values');
 end
 Bandwidths=[Ha Hx];
 Nbin_a=25;
