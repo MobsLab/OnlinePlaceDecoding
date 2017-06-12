@@ -42,3 +42,8 @@ end
 legend('show');
 xlabel('Systematic variable'); ylabel('Difference between mean p-value of all points and of selected points');
 title('Difference between the mean p-value for all points and of selected points, for different bandwidths');
+
+figure;
+for cut=1:size(mean_pvalue_lowSigma_all,1)
+	plot(systematic_variable, mean_pvalue_lowSigma_all(cut,SortIndex));hold on;
+end
