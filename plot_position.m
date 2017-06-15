@@ -246,6 +246,21 @@ imagesc(deviationY_image./counts_guess);hold on;colorbar;
 title('Standard deviation of Y');
 savefig([FileName,'error_deviation_image.fig']);
 
+figure('Name','error_deviation_all','NumberTitle','off');clf;
+subplot(2,2,1);
+imagesc(clean_matrix(errorX_image./counts_guess)+clean_matrix(errorX_map./counts));hold on;colorbar;
+title('Error on X');
+subplot(2,2,2);
+imagesc(clean_matrix(errorY_image./counts_guess)+clean_matrix(errorY_map./counts));hold on;colorbar;
+title('Error on Y');
+subplot(2,2,3);
+imagesc(clean_matrix(deviationX_image./counts_guess)+clean_matrix(deviationX_map./counts));hold on;colorbar;
+title('Standard deviation of X');
+subplot(2,2,4);
+imagesc(clean_matrix(deviationY_image./counts_guess)+clean_matrix(deviationY_map./counts));hold on;colorbar;
+title('Standard deviation of Y');
+savefig([FileName,'error_deviation_all.fig']);
+
 
 disp('to find the nth point on the map : plot(position(2,n),position(1,n),''go'')');
 
@@ -271,7 +286,7 @@ end
 % lowSigma_points=find(ecartT<7);
 lowSigma_X=guess_of_X(lowSigma_points);
 lowSigma_Y=guess_of_Y(lowSigma_points);
-f1=figure('Name','X&Y_with_Sigma<7','NumberTitle','off');clf;
+f1=figure('Name','X&Y_with_lowSigma','NumberTitle','off');clf;
 sb(1)=subplot(2,1,1);
 handle=fill([X,fliplr(X)],[guess_of_X-ecartT_x fliplr(guess_of_X+ecartT_x)],[176/255 224/255 230/255]);hold on;
 set(handle,'edgecolor','none');
@@ -291,7 +306,7 @@ legend('estimation of Y up to one-sigma','estimation of Y','measurement of Y','1
 xlabel('time'); ylabel('position along Y axis');
 linkaxes(sb');
 xlim([500*10/10 1000*10/10]);
-savefig([FileName,'X&Y_with_Sigma<7.fig']);
+savefig([FileName,'X&Y_with_lowSigma.fig']);
 
 mean_pvalue=mean(p_value);
 mean_pvalue_lowSigma=[];
