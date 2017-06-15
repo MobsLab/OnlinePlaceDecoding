@@ -294,7 +294,7 @@ plot(guess_of_X,'Color',[70/255 130/255 180/255]);hold on;
 plot(position(1,:),'Color',[220/255 20/255 60/255]);
 %plot(list10ms,result10msX,'.','Color',[47/255 79/255 79/255]);
 plot(lowSigma_points,lowSigma_X,'o','Color','k','markerfacecolor','k')
-legend('estimation of X up to one-sigma','estimation of X','measurement of X','10ms results w/ecartT<7');
+legend('estimation of X up to one-sigma','estimation of X','measurement of X','estimation of X results w/low sigma');
 xlabel('time'); ylabel('position along X axis');
 sb(2)=subplot(2,1,2);
 handle=fill([X,fliplr(X)],[guess_of_Y-ecartT_y fliplr(guess_of_Y+ecartT_y)],[176/255 224/255 230/255]);hold on;
@@ -302,7 +302,7 @@ set(handle,'edgecolor','none');
 plot(guess_of_Y,'Color',[70/255 130/255 180/255]);hold on;
 plot(position(2,:),'Color',[220/255 20/255 60/255]);
 plot(lowSigma_points,lowSigma_Y,'o','Color','k','markerfacecolor','k');
-legend('estimation of Y up to one-sigma','estimation of Y','measurement of Y','10ms results w/ecartT<7');
+legend('estimation of Y up to one-sigma','estimation of Y','measurement of Y','estimation of Y results w/low sigma');
 xlabel('time'); ylabel('position along Y axis');
 linkaxes(sb');
 xlim([500*10/10 1000*10/10]);
