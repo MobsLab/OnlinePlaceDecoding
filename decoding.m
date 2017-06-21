@@ -153,6 +153,7 @@ end
 disp(['Decoding finished ! We had ',num2str(size(position,2)),' readable bins.']);
 
 cd(FileName);
+save(['decoding_results_',num2str(time_bin*1000),'ms.mat'],'position_proba','position','spike_rate','FileName');
 plot_position
 
 clearvars -except DATA ENCODED_DATA position_proba position nb_clusters R Pos FileName Speed n_bypass nb_bins spike_rate time_bin nb_lowSigma_points mean_pvalue mean_pvalue_lowSigma

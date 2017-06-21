@@ -107,24 +107,102 @@ end
 
 
 
-% arena1x=[16 9 29 20 16]; arena1y=[3 29 29 3 3];
-% arena2x=[17 13 17 17]; arena2y=[12 25 25 12];
-% arena3x=[20 20 25 20]; arena3y=[12 25 25 12];
-% figure;
-% pause
-% for n=1:size(position,2)
-% 	a(:,:)=position_proba(:,:,n);
-% 	imagesc(a);hold on;colorbar;
-% 	plot(arena3x,arena3y,'-g');
-% 	plot(arena2x,arena2y,'-g');
-% 	plot(arena1x,arena1y,'-g');
-% 	plot(position(2,n),position(1,n),'o','Color','r','markerfacecolor','r');hold off;
-% 	colormap(parula);
-% 	pause(0.03);
-% 	if mod(n,floor(size(position,2)/100))==0
-% 		disp(['Reading results of decoding, ', num2str(100*n/size(position,2)), '% achieved']);
-% 	end
-% end
+
+X=(1:size(position,2))/10;
+ecartT=sqrt(ecartT_x.^2+ecartT_y.^2);
+%%%%%%%%%%%%%%%%-------------- MOVIE ---------------%%%%%%%%%%%%%%%%%%%%%%%
+arena1x=[14 7 7 29.5 29.5 21 14]; arena1y=[3 25 30 30 25 3 3];
+arena2x=[17 13 17 17]; arena2y=[12 25 25 12];
+arena3x=[20 20 25 20]; arena3y=[12 25 25 12];
+figure;
+spl3=subplot(1,9,3);
+handle=fill([guess_of_X-ecartT_x fliplr(guess_of_X+ecartT_x)],[X,fliplr(X)],[176/255 224/255 230/255]);hold on;
+set(handle,'edgecolor','none');
+plot(guess_of_X,(1:size(guess_of_X,2))/10,'Color',[70/255 130/255 180/255]);hold on;
+% plot(max_X);hold on;
+plot(position(1,:),(1:size(position,2))/10,'Color',[220/255 20/255 60/255]);
+% legend('estimation of X up to one-sigma','estimation of X','measurement of X');
+xlabel('X');
+ylim([-15 15]);
+xlim([0 30]);
+spl2=subplot(1,9,2);
+handle=fill([guess_of_Y-ecartT_y fliplr(guess_of_Y+ecartT_y)],[X,fliplr(X)],[176/255 224/255 230/255]);hold on;
+set(handle,'edgecolor','none');
+plot(guess_of_Y,(1:size(guess_of_Y,2))/10,'Color',[70/255 130/255 180/255]);hold on;
+% plot(max_Y);hold on;
+plot(position(2,:),(1:size(position,2))/10,'Color',[220/255 20/255 60/255]);
+% legend('estimation of Y up to one-sigma','estimation of Y','measurement of Y');
+xlabel('Y');
+ylim([-15 15]);
+xlim([0 30]);
+spl1=subplot(1,9,1);
+handle=fill([ones(size(X))*7 fliplr(ecartT)],[X,fliplr(X)],[250/255 128/255 114/255]);hold on;
+set(handle,'edgecolor','none');
+handle=fill([zeros(size(X)) fliplr(ones(size(X))*7)],[X,fliplr(X)],'w');hold on;
+set(handle,'edgecolor','none');
+handle=fill([zeros(size(X)) fliplr(min(ecartT,ones(size(X))*7))],[X,fliplr(X)],[176/255 224/255 230/255]);hold on;
+set(handle,'edgecolor','none');
+plot(ecartT,(1:size(ecartT,2))/10,'Color',[47/255 79/255 79/255]);
+xlabel('standard deviation'); ylabel('time (s)');
+ylim([-15 15]);
+xlim([min(ecartT) max(ecartT)]);
+set(spl2,'YTick',[]);
+set(spl3,'YTick',[]);
+p1=get(spl1,'pos');
+p2=get(spl2,'pos'); p2(3)=p2(3)+(p2(1)-p1(1)-p1(3)); p2(1)=p1(1)+p1(3); 
+p3=get(spl3,'pos'); p3(3)=p3(3)+(p3(1)-p2(1)-p2(3)); p3(1)=p2(1)+p2(3); 
+set(spl2,'pos',p2); set(spl3,'pos',p3);
+pause
+for n=400:size(position,2)
+	if n~=400
+		delete(lignes);
+		delete(lignev);
+		delete(lignex);
+		delete(ligney);
+	end
+	colormap(parula);
+	if ecartT(n)<7
+		spl4=subplot(1,9,[4 5 6 7 8 9]);
+		a(:,:)=position_proba(:,:,n);
+		imagesc(a);hold on;colorbar;
+		plot(arena3x,arena3y,'-g');
+		plot(arena2x,arena2y,'-g');
+		plot(arena1x,arena1y,'-g');
+		plot(position(2,n),position(1,n),'o','Color','r','markerfacecolor','r');hold off;
+		xlim([5 30]);
+	else
+		spl4=subplot(1,9,[4 5 6 7 8 9]);
+		imagesc(zeros(size(a)));hold on;colorbar;
+		fill([[0 31],fliplr([0 31])],[[0 0] fliplr([31 31])],[0.2081/2 0.1663/2 0.5292/2])
+		plot(arena3x,arena3y,'-r');
+		plot(arena2x,arena2y,'-r');
+		plot(arena1x,arena1y,'-r');
+		plot(position(2,n),position(1,n),'o','Color','r','markerfacecolor','r');hold off;
+		xlim([5 30]);
+	end
+	subplot(spl1);
+	lignes=hline((n-1)/10,'k');
+	lignev=vline(7,'r');
+	ylim([-15+(n-1)/10 15+(n-1)/10]);
+	subplot(spl2);
+	lignex=hline((n-1)/10,'k');
+	ylim([-15+(n-1)/10 15+(n-1)/10]);
+	subplot(spl3);
+	ligney=hline((n-1)/10,'k');
+	ylim([-15+(n-1)/10 15+(n-1)/10]);
+	pause(0.05);
+	if mod(n,floor(size(position,2)/100))==0
+		disp(['Reading results of decoding, ', num2str(100*n/size(position,2)), '% achieved']);
+	end
+end
+
+
+
+
+
+
+
+
 
 
 
@@ -140,7 +218,6 @@ end
 
 clearvars maxs testy
 
-X=1:size(position,2);
 
 f1=figure('Name','X&Y','NumberTitle','off');clf;
 sb(1)=subplot(2,1,1);
@@ -191,7 +268,6 @@ title(['Comparison of error histogram | mean : ',num2str(mean(comparison_error))
 savefig([FileName,'errors.fig']);
 
 
-ecartT=sqrt(ecartT_x.^2+ecartT_y.^2);
 figure('Name','standard_deviation','NumberTitle','off');clf;
 subplot(2,3,1);
 plot(ecartT_x,generalized_error,'b.');
