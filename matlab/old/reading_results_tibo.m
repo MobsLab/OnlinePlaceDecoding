@@ -48,10 +48,10 @@ clearvars cluster tetrode info n_tetrode
 %%%%%%%%%%%--- ERASE ARTEFACTS FROM POSITION ---%%%%%%%%%%%
 places=Behavior.Pos(1:end-1,[2;3]);
 places=[places Behavior.Speed];
-cleaned_x=places(places(:,3)>9,1)';
-cleaned_y=places(places(:,3)>9,2)';
-cleaned_x=cleaned_x(cleaned_x~=-1);
-cleaned_y=cleaned_y(cleaned_y~=-1);
+cleaned_x=places(places(:,3)>0.25,1)';
+cleaned_y=places(places(:,3)>0.25,2)';
+cleaned_x=cleaned_x([cleaned_x~=-1].*[cleaned_x~=0].*[cleaned_x~=nan]==1);
+cleaned_y=cleaned_y([cleaned_y~=-1].*[cleaned_y~=0].*[cleaned_y~=nan]==1);
 if size(cleaned_x)==size(cleaned_y)
 	cleaned_places=[cleaned_x;cleaned_y];
 else
@@ -88,24 +88,27 @@ for tetrode=1:size(nb_clusters,2)
 			%% This is cluster 0. This the trash. We don't use the trash.
 		else
 			features=Waveforms.W{1,sum(nb_clusters(1:tetrode-1))+find(clusters{tetrode}==SpikeData.s(cursor,3))}(clusters_cursors(SpikeData.s(cursor,3)),(1:end)',15);
-			try
-				posX=Behavior.Pos(floor(SpikeData.s(cursor,1)/(Behavior.Pos(end,1)/size(Behavior.Pos,1))),2);
-				posY=Behavior.Pos(floor(SpikeData.s(cursor,1)/(Behavior.Pos(end,1)/size(Behavior.Pos,1))),3);
-				%% We Select data where speed is at least 9 (see speed_plots)
-				if Behavior.Speed(floor(SpikeData.s(cursor,1)/(Behavior.Pos(end,1)/size(Behavior.Pos,1))))>9
-					buffer_events=[buffer_events [features';posX;posY]];
-					buffer_pos=[buffer_pos SpikeData.s(cursor,1)];
+			if SpikeData.s(cursor,1)<Behavior.Pos(end,1) && SpikeData.s(cursor,1)>Behavior.Pos(1,1)
+				try
+					[time_difference index]=min(abs(Behavior.Pos(:,1)-SpikeData.s(cursor,1)));
+					posX=Behavior.Pos(index,2);
+					posY=Behavior.Pos(index,3);
+					%% We Select data where speed is at least 9 (see speed_plots)
+					if Behavior.Speed(index)>0.25
+						buffer_events=[buffer_events [features';posX;posY]];
+						buffer_pos=[buffer_pos SpikeData.s(cursor,1)];
+					end
+				catch
+					%% Spikes are unclassified when video informations are lacking
+					unclassified_spikes=[unclassified_spikes cursor];
 				end
-			catch
-				%% Spikes are unclassified when video informations are lacking
-				unclassified_spikes=[unclassified_spikes cursor];
 			end
 			clusters_cursors(SpikeData.s(cursor,3))=clusters_cursors(SpikeData.s(cursor,3))+1;
 		end
 		
 
 
-		%% We use a buffer to reduce reading time. Here we empty it in the definitive table.
+		%% We use a buffer to reduce reading time. Here we empty it in the definitive table. The size of the buffer is adjustable, its only influence is on efficiency, results are identicals.
 		if size(buffer_events,2)>20000
 			list_events=[list_events buffer_events];
 			buffer_events=[];
@@ -118,7 +121,7 @@ for tetrode=1:size(nb_clusters,2)
 
 		%% From time to time, we give an update
 		if mod(cursor,floor(size(SpikeData.s,1)/1000))==0
-			disp(['Reading electrode number ',num2str(tetrode),', ', num2str(100*cursor/size(SpikeData.s,1)), '% of total achieved']);
+			disp(['Reading electrode number ',num2str(tetrode),', ', num2str(100*cursor/size(SpikeData.s,1)), '% of total achieved, Buffer at : ',num2str(size(buffer_events,2))]);
 		end
 
 		%% We deal with arriving to the very end of the file

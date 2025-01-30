@@ -1,0 +1,31 @@
+#!/usr/bin/env python3
+import os
+import sys
+import numpy as np
+from scipy.io import savemat
+
+import argparse
+parser = argparse.ArgumentParser(description="Converts open-ephys events to mat files")
+parser.add_argument('-p','--path', type=str, help="path to \"events\" folder of recording session")
+args = parser.parse_args()
+path = os.path.abspath(os.path.expanduser(args.path))
+if '.' in path:
+	if not 'Rhythm_FPGA-100.0' in path:
+		raise ValueError('Please give full path, not relative path.')
+
+constructFolderName = lambda path, s: s if path[-1]=='/' else constructFolderName(path[:-1], path[-1]+s)
+findFolderName = lambda path: constructFolderName(path, '') if path!='/' else findFolderName(path[:-1], '')
+
+findPreviousFolderName = lambda path: findFolderName(path[:-1]) if path[-1]=='/' else findPreviousFolderName(path[:-1])
+
+
+for r,d,f in os.walk(path):
+	data = {}
+	if np.sum(['.npy' in n for n in f])==0:
+		continue
+	for file in f:
+		if '.npy' in file:
+			data[file[:-4]] = np.load(r + '/' + file)
+
+	savemat(path + '/'+ findPreviousFolderName(r) + '_' + findFolderName(r) +'.mat', data)
+

@@ -1,0 +1,124 @@
+#!/bin/bash
+
+args=("$@")
+
+
+# Header
+echo
+echo
+COLUMNS=$(tput cols) 
+title="||  MOBS full flow encoder $1 ||" 
+printf "%*s\n" $(((${#title}+$COLUMNS)/2)) "$title"
+title="may 2019" 
+printf "%*s\n" $(((${#title}+$COLUMNS)/2)) "$title"
+title="email : t.balenbois@gmail.com" 
+printf "%*s\n" $(((${#title}+$COLUMNS)/2)) "$title"
+
+echo
+echo
+
+# If image is not here, create it
+docker image inspect mobsencoder-dev &> /dev/null
+imageTest=$?
+if test $imageTest -ne 0
+then
+	docker build -t mobsencoder-dev $HOME/Dropbox/Kteam/PrgMatlab/Thibault/dockerFiles/mobsencoder-dev
+	if test $? -ne 0
+	then
+		echo "can't build docker image."
+	else
+		echo "docker image buildt."
+	fi
+else
+	echo "docker image found."
+fi
+
+# Select computing device using nvidia-smi test
+device=cpu
+nvidia-smi &> /dev/null
+nvidiaTest=$?
+if test $nvidiaTest -ne 0
+then
+	echo "nvidia driver not found."
+	device=cpu
+else
+	echo "nvidia driver found."
+	echo "using gpu for computations"
+	device=gpu
+fi
+
+
+
+
+# folder='Documents/dataset/Mouse-797'
+# relativePath="$folder/ERC-Mouse-797-09112018-Hab_SpikeRef.xml"
+folder='Documents/dataset/M0936'
+relativePath="$folder/M936_20190804_Reversal.xml"
+
+
+
+# Machine specification
+unameOut="$(uname -s)"
+case "${unameOut}" in
+	Linux*)	base="home"
+	;;
+	Darwin*)	base="users"
+	;;
+	*)	base="home"
+	;;
+esac
+
+
+
+# If some files are missing, run some matlab code to generate them
+log=mlog.out
+prjpath="$HOME/Dropbox/Kteam/PrgMatlab/OnlinePlaceDecoding"
+if [ ! -f "$HOME/$folder/behavResources.mat" ] || [ ! -f "$HOME/$folder/$log" ] || [ ! -f "$HOME/$folder/nnBehavior.mat" ]
+then
+
+	rm -f $HOME/$folder/$log
+	echo
+	echo MATLAB is now exporting behavior data, please see $log for more infos.
+cat <<EOF | matlab -nodesktop -nosplash -nodisplay /> $HOME/$folder/$log
+	cd $prjpath
+	LoadPATHencoder $USER;
+	cd $HOME/$folder/;
+	export_spikes;
+	exit
+EOF
+	matlabExitCatch=$?
+	if test $matlabExitCatch -ne 0; then
+		echo
+		echo Matlab was unable to extract data from "$HOME/$folder/behavResources.mat", does this file exist ?
+		exit 1
+	fi
+	touch $HOME/$folder/$log
+	echo Behavior data exported.
+fi
+
+
+
+# Use a docker image for the actual computation
+# docker run --runtime=nvidia -it \
+# 	-w /MOBSencoder \
+# 	-v $HOME/Dropbox/Kteam/PrgMatlab/Thibault:/MOBSencoder \
+# 	-v $HOME/$folder:/root/$folder \
+# 	-e HOST_PERMS="$(id -u):$(id -g)" mobsencoder-dev python ./mobsEncoder.py $device "~/$relativePath"
+docker run --runtime=nvidia -it \
+	-w /MOBSencoder \
+	-v $HOME/Dropbox/Kteam/PrgMatlab/Thibault:/MOBSencoder \
+	-v $HOME/Documents/dataset/RatCatanese:/root/Documents/dataset/RatCatanese \
+	-e HOST_PERMS="$(id -u):$(id -g)" mobsencoder-dev python ./mobsEncoder.py $device "~/Documents/dataset/RatCatanese/rat122-20090731.xml"
+	# -e HOST_PERMS="$(id -u):$(id -g)" mobsencoder-dev python ./tensorflow.rnn.gpu.bin.py $device
+python3 $HOME/Dropbox/Kteam/PrgMatlab/Thibault/tensorflow.rnn.print.py "~/Documents/dataset/RatCatanese/"
+exit 0
+
+exitcatch=$?
+
+# handle error and print
+if test $exitcatch -ne 0; then
+	echo learning non successfull. Error code $exitcatch
+else
+	echo learning successfull.
+	python3 $HOME/Dropbox/Kteam/PrgMatlab/Thibault/tensorflow.rnn.print.py "~/$relativePath"
+fi

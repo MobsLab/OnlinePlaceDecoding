@@ -1,0 +1,6 @@
+[Dolphin]
+SortRole=modificationtime
+Timestamp=2020,11,18,14,13,38
+Version=4
+ViewMode=1
+VisibleRoles=CustomizedDetails,Details_text,Details_size,Details_modificationtime,Details_type,Details_creationtime,Details_accesstime
